@@ -1,14 +1,21 @@
-use std::{fs::File, path::Path};
+use std::{fs::File, path::{Path, PathBuf}, fmt::Debug};
 
 type Result<T> = std::io::Result<T>;
 
-pub trait FileFlex: AsRef<Path> {
+pub trait FileFlex: AsRef<Path> + Debug {
     fn truncatable(&self) -> File {
-        File::options()
+        match File::options()
+            .write(true)
             .truncate(true)
             .create(true)
-            .open(self)
-            .unwrap()
+            .open(self) {
+                Ok(f) => f,
+                Err(err) => {
+                    dbg!(err, self);
+                    panic!();
+                }
+            }
+            
     }
 
     fn try_truncatable(&self) -> Result<File> {
@@ -17,6 +24,7 @@ pub trait FileFlex: AsRef<Path> {
 
     fn appendable(&self) -> File {
         File::options()
+        .write(true)
             .append(true)
             .create(true)
             .open(self)
@@ -28,7 +36,18 @@ pub trait FileFlex: AsRef<Path> {
     }
 
     fn readable(&self) -> File {
-        File::options().read(true).open(self).unwrap()
+        match File::options().read(true).open(self) {
+            Ok(f) => f,
+            Err(err) => {
+                match err.kind() {
+                    std::io::ErrorKind::NotFound => {
+                        dbg!(err, self);
+                        panic!();
+                    }
+                    _ => todo!(),
+                } 
+            }
+        }
     }
 
     fn try_readable(&self) -> Result<File> {
@@ -37,6 +56,10 @@ pub trait FileFlex: AsRef<Path> {
 }
 
 impl FileFlex for &str {}
+
+impl FileFlex for PathBuf {}
+
+impl FileFlex for &dyn FileFlex {}
 
 #[test]
 fn test_file_flex() {
