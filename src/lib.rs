@@ -61,6 +61,8 @@ impl FileFlex for PathBuf {}
 
 impl FileFlex for &dyn FileFlex {}
 
+impl FileFlex for Path {}
+
 #[test]
 fn test_file_flex() {
     use std::io::{Read, Write};
