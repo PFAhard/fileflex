@@ -1,4 +1,4 @@
-use std::{fs::File, path::{Path, PathBuf}, fmt::Debug};
+use std::{ffi::{OsStr, OsString}, fmt::Debug, fs::File, path::{Path, PathBuf}};
 
 type Result<T> = std::io::Result<T>;
 
@@ -62,6 +62,10 @@ impl FileFlex for PathBuf {}
 impl FileFlex for &dyn FileFlex {}
 
 impl FileFlex for Path {}
+
+impl FileFlex for OsString {}
+
+impl FileFlex for OsStr {}
 
 #[test]
 fn test_file_flex() {
