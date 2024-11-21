@@ -1,4 +1,9 @@
-use std::{ffi::{OsStr, OsString}, fmt::Debug, fs::File, path::{Path, PathBuf}};
+use std::{
+    ffi::{OsStr, OsString},
+    fmt::Debug,
+    fs::File,
+    path::{Path, PathBuf},
+};
 
 type Result<T> = std::io::Result<T>;
 
@@ -8,14 +13,14 @@ pub trait FileFlex: AsRef<Path> + Debug {
             .write(true)
             .truncate(true)
             .create(true)
-            .open(self) {
-                Ok(f) => f,
-                Err(err) => {
-                    dbg!(err, self);
-                    panic!();
-                }
+            .open(self)
+        {
+            Ok(f) => f,
+            Err(err) => {
+                dbg!(err, self);
+                panic!();
             }
-            
+        }
     }
 
     fn try_truncatable(&self) -> Result<File> {
@@ -24,7 +29,7 @@ pub trait FileFlex: AsRef<Path> + Debug {
 
     fn appendable(&self) -> File {
         File::options()
-        .write(true)
+            .write(true)
             .append(true)
             .create(true)
             .open(self)
@@ -38,15 +43,13 @@ pub trait FileFlex: AsRef<Path> + Debug {
     fn readable(&self) -> File {
         match File::options().read(true).open(self) {
             Ok(f) => f,
-            Err(err) => {
-                match err.kind() {
-                    std::io::ErrorKind::NotFound => {
-                        dbg!(err, self);
-                        panic!();
-                    }
-                    _ => todo!(),
-                } 
-            }
+            Err(err) => match err.kind() {
+                std::io::ErrorKind::NotFound => {
+                    dbg!(err, self);
+                    panic!();
+                }
+                _ => todo!(),
+            },
         }
     }
 
@@ -66,6 +69,8 @@ impl FileFlex for Path {}
 impl FileFlex for OsString {}
 
 impl FileFlex for OsStr {}
+
+impl FileFlex for String {}
 
 #[test]
 fn test_file_flex() {
