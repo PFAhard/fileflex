@@ -1,3 +1,6 @@
+#[cfg(feature = "tokio")]
+pub mod tokio;
+
 use std::{
     ffi::{OsStr, OsString},
     fmt::Debug,
@@ -57,6 +60,8 @@ pub trait FileFlex: AsRef<Path> + Debug {
         File::options().read(true).open(self)
     }
 }
+
+impl<F> FileFlex for &F where F: FileFlex {}
 
 impl FileFlex for &str {}
 
